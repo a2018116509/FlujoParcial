@@ -1,16 +1,34 @@
-using System;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Extensions.Logging;
-
 namespace fncImpar
 {
+    using System;
+    using System.Threading.Tasks;
+    using Microsoft.Azure.WebJobs;
+    using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
     public static class Function1
     {
         [FunctionName("Function1")]
-        public static void Run([ServiceBusTrigger("qimpar", Connection = "MyConn")]string myQueueItem, ILogger log)
+        public static async Task RunAsync([ServiceBusTrigger(
+                "qimpar", 
+                Connection = "MyConn"
+                )]string myQueueItem,
+            [CosmosDB(
+                databaseName: "dbImpar",
+                collectionName: "Impares",
+                ConnectionStringSetting = "strCosmos"
+                )]IAsyncCollector<object> datos,
+            ILogger log)
         {
-            log.LogInformation($"C# ServiceBus queue trigger function processed message: {myQueueItem}");
+            try
+            {
+                log.LogInformation($"C# ServiceBus queue trigger function processed message: {myQueueItem}");
+                var dataRandom = JsonConvert.DeserializeObject<Random>(myQueueItem);
+                await datos.AddAsync(dataRandom);
+            }
+            catch(Exception ex) 
+            {
+                log.LogError($"No fue posible insertar datos: {ex.Message}");
+            }
         }
     }
 }
