@@ -29,7 +29,21 @@
                 Console.WriteLine($"Sent a single message to the queue: {queueName}");
             }
 
+            await using (ServiceBusClient client = new ServiceBusClient(connectionString))
+            {
+                // create a sender for the queue 
+                ServiceBusSender sender = client.CreateSender(queueName);
+
+                // create a message that we can send
+                ServiceBusMessage message = new ServiceBusMessage(mensaje);
+
+                // send the message
+                await sender.SendMessageAsync(message);
+                Console.WriteLine($"Sent a single message to the queue: {queueName}");
+            }
+
             return true;
         }
+
     }
 }

@@ -1,5 +1,4 @@
-﻿
-namespace apiDoble.Models
+﻿namespace fncImpar.Models
 {
     using System;
     using System.ComponentModel.DataAnnotations;
